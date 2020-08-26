@@ -16,7 +16,6 @@ import keras
 import warnings
 """"
 cmap = plt.get_cmap('inferno')
-
 plt.figure(figsize=(10, 10))
 genres = 'blues classical country disco hiphop jazz metal pop reggae rock'.split()
 for g in genres:
@@ -46,24 +45,27 @@ with file:
     writer.writerow(header)
 genres = 'blues classical country disco hiphop jazz metal pop reggae rock'.split()
 for g in genres:
-    for filename in os.listdir(f'./MIR/genres/{g}'):
-        songname = f'./MIR/genres/{g}/{filename}'
-        y, sr = librosa.load(songname, mono=True, duration=30)
-        chroma_stft = librosa.feature.chroma_stft(y=y, sr=sr)
-        spec_cent = librosa.feature.spectral_centroid(y=y, sr=sr)
-        spec_bw = librosa.feature.spectral_bandwidth(y=y, sr=sr)
-        rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)
-        zcr = librosa.feature.zero_crossing_rate(y)
-        mfcc = librosa.feature.mfcc(y=y, sr=sr)
-        rms = librosa.feature.rms(y=y)
-        to_append = f'{filename} {np.mean(chroma_stft)} {np.mean(rms)} {np.mean(spec_cent)} {np.mean(spec_bw)} {np.mean(rolloff)} {np.mean(zcr)}'
-        for e in mfcc:
-            to_append += f' {np.mean(e)}'
-        to_append += f' {g}'
-        file = open('data.csv', 'a', newline='')
-        with file:
-            writer = csv.writer(file)
-            writer.writerow(to_append.split())
+    for filename in os.listdir(f'./Data/genres_original/{g}'):
+        try:
+            songname = f'./Data/genres_original/{g}/{filename}'
+            y, sr = librosa.load(songname, mono=True, duration=30)
+            chroma_stft = librosa.feature.chroma_stft(y=y, sr=sr)
+            spec_cent = librosa.feature.spectral_centroid(y=y, sr=sr)
+            spec_bw = librosa.feature.spectral_bandwidth(y=y, sr=sr)
+            rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)
+            zcr = librosa.feature.zero_crossing_rate(y)
+            mfcc = librosa.feature.mfcc(y=y, sr=sr)
+            rms = librosa.feature.rms(y=y)
+            to_append = f'{filename} {np.mean(chroma_stft)} {np.mean(rms)} {np.mean(spec_cent)} {np.mean(spec_bw)} {np.mean(rolloff)} {np.mean(zcr)}'
+            for e in mfcc:
+                to_append += f' {np.mean(e)}'
+            to_append += f' {g}'
+            file = open('data.csv', 'a', newline='')
+            with file:
+                writer = csv.writer(file)
+                writer.writerow(to_append.split())
+        except:
+            continue
 
 data = pd.read_csv('data.csv')
 data.head()
@@ -91,10 +93,9 @@ model.compile(optimizer='adam',
 
 history = model.fit(X_train,
                     y_train,
-                    epochs=20,
+                    epochs=18,
                     batch_size=128)
 
 test_loss, test_acc = model.evaluate(X_test,y_test)
 
 print(test_acc)
-
